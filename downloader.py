@@ -163,7 +163,7 @@ def download_playlist(yt_link, save_path=''):
 			
 	with open(subfolder + '/metadata.txt', 'w') as file:
 		def save(id, data):
-			file.write(f'{id:<3} {data[0]:<40} {data[1]:<20} {data[2]:<20} {data[3]}')
+			file.write(f'{id:<3} {data[0]:<40} {data[1]:<20} {data[2]:<20} {data[3]}\n')
 		
 		# big brain header writing
 		save('ID', ('Video title', 'Assessed artists', 'Assessed title', 'Filename'))
