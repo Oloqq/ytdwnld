@@ -93,11 +93,16 @@ def assess_metadata(yt_title, channel):
 	# parts = list(title.partition('-'))
 	# parts[:] = [p.strip() for p in parts]	
 
-def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists, tutorial=False):
+def set_metadata(filename, title, artists):
+	tag = eyed3.load(filename).tag
+	tag.artist = artists
+	tag.title = title
+	tag.save()
+
+def ask_about_metadata(filename, yt_title, assessed_title, assessed_artists, tutorial=False):
 	if tutorial:
 		print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
 	
-	tag = eyed3.load(filepath).tag
 	print('YT video title:', yt_title)
 	inp = input('Assessed title: ' + assessed_title + ' | ')
 	if inp != '':
@@ -105,9 +110,8 @@ def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists, tut
 	inp = input('Assessed artists: ' + assessed_artists.strip(';') + ' | ')
 	if inp != '':
 		assessed_artists = inp
-	tag.artist = assessed_artists
-	tag.title = assessed_title
-	tag.save()
+		
+	set_metadata(filename, assessed_title, assessed_artists)
 
 def download_song(yt_link, save_path='', confirm_properties=False):
 	yt = YouTube(yt_link)
@@ -129,6 +133,8 @@ def download_song(yt_link, save_path='', confirm_properties=False):
 	
 	if confirm_properties:
 		ask_about_metadata(mp3_path, yt_title, title, artists, tutorial=True)
+	else:
+		set_metadata(mp3_path, title, artists)
 	
 	return (yt_title, 'downloaded', title, artists, mp3_path)
 
@@ -140,11 +146,9 @@ def download_playlist(yt_link, save_path=''):
 		return
 		
 	subfolder = os.path.join(save_path, clear_title(playlist.title))
-	# metadata_log = open(subfolder + 'metadata.txt', 'w')
 	
-	present = 0
-	downloaded = 0
-	new_files = []
+	present = []
+	downloaded = []
 	
 	i = 0
 	for link in playlist:
@@ -153,29 +157,45 @@ def download_playlist(yt_link, save_path=''):
 		
 		video_title, status, title, artists, path = download_song(link, subfolder)
 		if status == 'present':
-			present += 1
-			new_files.append((path, video_title, title, artists))
+			present.append((video_title, artists, title, path))
 		elif status == 'downloaded':
-			downloaded += 1
-			new_files.append((path, video_title, title, artists))
+			downloaded.append((video_title, artists, title, path))
 			
-	print()
-	print('Check new files\' metadata')
-	print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
-	for entry in new_files:
-		tag = eyed3.load(entry[0]).tag
-		title = entry[2]
-		artists = entry[3]
-		print('YT video title:', entry[1])
-		inp = input('Assessed title: ' + title + ' ')
-		if inp != '':
-			title = inp
-		inp = input('Assessed artists: ' + artists.strip(';') + ' ')
-		if inp != '':
-			artists = inp
-		tag.artist = artists
-		tag.title = title
-		tag.save()
+	with open(subfolder + '/metadata.txt', 'w') as file:
+		def save(id, data):
+			file.write(f'{id:<3} {data[0]:<40} {data[1]:<20} {data[2]:<20} {data[3]}')
+		
+		# big brain header writing
+		save('ID', ('Video title', 'Assessed artists', 'Assessed title', 'Filename'))
+		i = 0
+		for d in downloaded:
+			i += 1
+			save(i, d)
+		
+		if len(present) > 0:
+			file.write('# Entries below were already present, not downloaded; You can still modify their metadata as usual')
+			for p in present:
+				i += 1
+				save(i, p)
+	
+			
+	# print()
+	# print('Check new files\' metadata')
+	# print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
+	# for entry in new_files:
+	# 	tag = eyed3.load(entry[0]).tag
+	# 	title = entry[2]
+	# 	artists = entry[3]
+	# 	print('YT video title:', entry[1])
+	# 	inp = input('Assessed title: ' + title + ' ')
+	# 	if inp != '':
+	# 		title = inp
+	# 	inp = input('Assessed artists: ' + artists.strip(';') + ' ')
+	# 	if inp != '':
+	# 		artists = inp
+	# 	tag.artist = artists
+	# 	tag.title = title
+	# 	tag.save()
 
 if __name__ == '__main__':
 	print('YEEEEEEE')
