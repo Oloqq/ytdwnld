@@ -166,14 +166,14 @@ def download_playlist(yt_link, save_path=''):
 			file.write(f'{id:<3} {data[0]:<40} {data[1]:<20} {data[2]:<20} {data[3]}\n')
 		
 		# big brain header writing
-		save('ID', ('Video title', 'Assessed artists', 'Assessed title', 'Filename'))
+		save('ID', ('Video_title', 'Assessed_artists', 'Assessed_title', 'Filename'))
 		i = 0
 		for d in downloaded:
 			i += 1
 			save(i, d)
 		
 		if len(present) > 0:
-			file.write('# Entries below were already present, not downloaded; You can still modify their metadata as usual')
+			file.write('# Entries below were already present, not downloaded; You can still modify their metadata as usual\n')
 			for p in present:
 				i += 1
 				save(i, p)
