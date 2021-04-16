@@ -26,13 +26,6 @@ def clear_title(t: str):
 	
 	return t
 
-def song_exists(save_path, title):
-	path = os.path.abspath(os.path.join(save_path, title + '.mp3'))
-	print(path)
-	if os.path.exists(path):
-		return True
-	return False
-
 def assess_properties(raw, channel):
 	feat_marks = ['ft.', 'feat.']
 	
@@ -101,11 +94,25 @@ def assess_properties(raw, channel):
 	# parts = list(title.partition('-'))
 	# parts[:] = [p.strip() for p in parts]	
 
-def download_song(yt_link, save_path, confirm_properties=False):
+def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists):
+	tag = eyed3.load(filepath).tag
+	print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
+	print('YT video title:', yt_title)
+	inp = input('Assessed title: ' + assessed_title + ' | ')
+	if inp != '':
+		assessed_title = inp
+	inp = input('Assessed artists: ' + assessed_artists.strip(';') + ' | ')
+	if inp != '':
+		assessed_artists = inp
+	tag.artist = assessed_artists
+	tag.title = assessed_title
+	tag.save()
+
+def download_song(yt_link, save_path='test', confirm_properties=False):
 	yt = YouTube(yt_link)
 	title, channel = clear_title(yt.title), yt.author
 	mp3_path = os.path.join(save_path, title + '.mp3')
-	if song_exists(save_path, title):
+	if os.path.exists(mp3_path):
 		print(title, 'is already downloaded. Skipping.')
 		title_assessed, artists = assess_properties(title, channel)
 		return (title, 'present', title_assessed, artists, os.path.join(save_path, title + '.mp3'))
@@ -120,18 +127,7 @@ def download_song(yt_link, save_path, confirm_properties=False):
 	title_assessed, artists = assess_properties(title, channel)
 	
 	if confirm_properties:
-		tag = eyed3.load(mp3_path).tag
-		print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
-		print('YT video title:', title)
-		inp = input('Assessed title: ' + title_assessed + ' ')
-		if inp != '':
-			title_assessed = inp
-		inp = input('Assessed artists: ' + artists.strip(';') + ' ')
-		if inp != '':
-			artists = inp
-		tag.artist = artists
-		tag.title = title_assessed
-		tag.save()
+		ask_about_metadata(mp3_path, title, title_assessed, artists)
 	
 	return (title, 'downloaded', title_assessed, artists, mp3_path)
 
@@ -174,11 +170,14 @@ def download_playlist(yt_link):
 		tag.save()
 
 if __name__ == '__main__':
+	print('YEEEEEEE')
 	# video_title, status, title, artists = download_song('https://www.youtube.com/watch?v=XykXStXeVO8', 'test2', confirm_properties=True)
 	# print(video_title, status, title, artists)
 	dw = 'https://www.youtube.com/playlist?list=PLlBePZw5hmReewZPbnTRJsfNvhAxgryii'
 	fumar_mata = 'https://www.youtube.com/playlist?list=PLks6UYnFddFlchoJnLIOB-gcegojnpAD7'
-	download_playlist(dw)
+	klubowe = 'https://www.youtube.com/watch?v=xwCk8H7-DdI'
+	download_song(klubowe, confirm_properties=True)
+	# download_playlist(dw)
 	# download_playlist(fumar_mata)
 	
 	
