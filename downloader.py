@@ -1,5 +1,7 @@
 # playlist can't be set to private,
 
+# pylint: disable=unused-variable
+
 from pytube import Playlist, YouTube
 from moviepy.editor import AudioFileClip
 import sys
@@ -23,8 +25,8 @@ def clear_title(t: str):
 	
 	return t
 
-def assess_properties(raw, channel):
-	feat_marks = ['ft.', 'feat.']
+def assess_metadata(yt_title, channel):
+	feat_marks = ['ft.', 'feat.', 'ft ']
 	
 	def isolate_feats(raw):
 		artists = ''
@@ -45,16 +47,16 @@ def assess_properties(raw, channel):
 	title = ''
 	
 	for a in dash_artists:
-		pos = raw.lower().find(a.lower())
+		pos = yt_title.lower().find(a.lower())
 		if pos != -1:
 			artists += a + ';'
-			raw = raw[:pos] + raw[pos+len(a):]
+			yt_title = yt_title[:pos] + yt_title[pos+len(a):]
 	
 	artist_part = None
 	title_part = None
-	parts = raw.partition('-')
+	parts = yt_title.partition('-')
 	if parts[1] == '': # no dash
-		title_part = raw.strip()
+		title_part = yt_title.strip()
 		if artists == '': # making sure no artist with a dash was detected
 			artists = channel + ';'
 	else:
@@ -109,39 +111,46 @@ def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists, tut
 
 def download_song(yt_link, save_path='', confirm_properties=False):
 	yt = YouTube(yt_link)
-	title, channel = clear_title(yt.title), yt.author
-	mp3_path = os.path.join(save_path, title + '.mp3')
+	yt_title, channel = clear_title(yt.title), yt.author
+	mp3_path = os.path.join(save_path, yt_title + '.mp3')
 	if os.path.exists(mp3_path):
-		print(title, 'is already downloaded. Skipping.')
-		assessed_title, artists = assess_properties(title, channel)
-		return (title, 'present', assessed_title, artists, os.path.join(save_path, title + '.mp3'))
+		print(yt_title, 'is already downloaded. Skipping.')
+		tag = eyed3.load(mp3_path).tag
+		return (yt_title, 'present', tag.title, tag.artist, mp3_path)
 		
-	print('Downloading', title)
-	mp4_path = yt.streams.filter(only_audio=True).first().download(save_path, filename=title)	
+	print('Downloading', yt_title)
+	mp4_path = yt.streams.filter(only_audio=True).first().download(save_path, filename=yt_title)	
 	audio = AudioFileClip(mp4_path)
 	audio.write_audiofile(mp3_path)
 	audio.close()
 	os.remove(mp4_path)
 	
-	assessed_title, artists = assess_properties(title, channel)
+	title, artists = assess_metadata(yt_title, channel)
 	
 	if confirm_properties:
-		ask_about_metadata(mp3_path, title, assessed_title, artists, tutorial=True)
+		ask_about_metadata(mp3_path, yt_title, title, artists, tutorial=True)
 	
-	return (title, 'downloaded', assessed_title, artists, mp3_path)
+	return (yt_title, 'downloaded', title, artists, mp3_path)
 
-def download_playlist(yt_link):
+def download_playlist(yt_link, save_path=''):
 	playlist = Playlist(yt_link)
-	subfolder = clear_title(playlist.title)
-	if len(playlist) == 0:
-		print('Failed getting playlist')
+	size = len(playlist)
+	if size == 0:
+		print('Failed getting playlist, or playlist is empty. Make sure the playlist is not set to private.')
 		return
 		
+	subfolder = os.path.join(save_path, clear_title(playlist.title))
+	# metadata_log = open(subfolder + 'metadata.txt', 'w')
+	
 	present = 0
 	downloaded = 0
 	new_files = []
-		
+	
+	i = 0
 	for link in playlist:
+		i += 1
+		print(f'{i}/{size}: ', end='') # print progress
+		
 		video_title, status, title, artists, path = download_song(link, subfolder)
 		if status == 'present':
 			present += 1
@@ -175,8 +184,8 @@ if __name__ == '__main__':
 	dw = 'https://www.youtube.com/playlist?list=PLlBePZw5hmReewZPbnTRJsfNvhAxgryii'
 	fumar_mata = 'https://www.youtube.com/playlist?list=PLks6UYnFddFlchoJnLIOB-gcegojnpAD7'
 	klubowe = 'https://www.youtube.com/watch?v=xwCk8H7-DdI'
-	download_song(klubowe, confirm_properties=True)
+	# download_song(klubowe, save_path='test', confirm_properties=True)
 	# download_playlist(dw)
-	# download_playlist(fumar_mata)
+	download_playlist(fumar_mata, 'test2')
 	
 	
