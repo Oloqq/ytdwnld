@@ -1,9 +1,10 @@
 import eyed3
 
-file = eyed3.load('converted.mp3')
+file = eyed3.load('aarfw.webm')
 tag = file.tag
 
 tag.artist = 'skibidi bap mm dada'
+tag.title = 'spotiprosze'
 
 tag.save()
 

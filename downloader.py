@@ -7,9 +7,6 @@ import os
 import re
 import eyed3
 
-# fumar mata
-# https://www.youtube.com/playlist?list=PLks6UYnFddFlchoJnLIOB-gcegojnpAD7
-
 def one_of_in(one_of, container):
 	for a in one_of:
 		if a in container:
@@ -20,9 +17,9 @@ def clear_title(t: str):
 	# remove HTML
 	t = re.sub(r'(&\w*;)+', '', t)
 	
-	# remove characters disliked by windows or pytube
-	# t = re.sub(r'[^\w\s\-&.()]+', '', t)
+	# remove characters disliked by windows
 	t = re.sub(r'[\\/:*?"<>|]+', ' ', t).strip()
+	# t = re.sub(r'[^\w\s\-&.()]+', '', t)
 	
 	return t
 
@@ -94,9 +91,11 @@ def assess_properties(raw, channel):
 	# parts = list(title.partition('-'))
 	# parts[:] = [p.strip() for p in parts]	
 
-def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists):
+def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists, tutorial=False):
+	if tutorial:
+		print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
+	
 	tag = eyed3.load(filepath).tag
-	print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
 	print('YT video title:', yt_title)
 	inp = input('Assessed title: ' + assessed_title + ' | ')
 	if inp != '':
@@ -108,14 +107,14 @@ def ask_about_metadata(filepath, yt_title, assessed_title, assessed_artists):
 	tag.title = assessed_title
 	tag.save()
 
-def download_song(yt_link, save_path='test', confirm_properties=False):
+def download_song(yt_link, save_path='', confirm_properties=False):
 	yt = YouTube(yt_link)
 	title, channel = clear_title(yt.title), yt.author
 	mp3_path = os.path.join(save_path, title + '.mp3')
 	if os.path.exists(mp3_path):
 		print(title, 'is already downloaded. Skipping.')
-		title_assessed, artists = assess_properties(title, channel)
-		return (title, 'present', title_assessed, artists, os.path.join(save_path, title + '.mp3'))
+		assessed_title, artists = assess_properties(title, channel)
+		return (title, 'present', assessed_title, artists, os.path.join(save_path, title + '.mp3'))
 		
 	print('Downloading', title)
 	mp4_path = yt.streams.filter(only_audio=True).first().download(save_path, filename=title)	
@@ -124,12 +123,12 @@ def download_song(yt_link, save_path='test', confirm_properties=False):
 	audio.close()
 	os.remove(mp4_path)
 	
-	title_assessed, artists = assess_properties(title, channel)
+	assessed_title, artists = assess_properties(title, channel)
 	
 	if confirm_properties:
-		ask_about_metadata(mp3_path, title, title_assessed, artists)
+		ask_about_metadata(mp3_path, title, assessed_title, artists, tutorial=True)
 	
-	return (title, 'downloaded', title_assessed, artists, mp3_path)
+	return (title, 'downloaded', assessed_title, artists, mp3_path)
 
 def download_playlist(yt_link):
 	playlist = Playlist(yt_link)
