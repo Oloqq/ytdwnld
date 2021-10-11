@@ -244,14 +244,22 @@ def alter_metadata(filename):
 
 if __name__ == '__main__':
 	print('YEEEEEEE')
-	# video_title, status, title, artists = download_song('https://www.youtube.com/watch?v=XykXStXeVO8', 'test2', confirm_properties=True)
-	# print(video_title, status, title, artists)
-	dw = 'https://www.youtube.com/playlist?list=PLlBePZw5hmReewZPbnTRJsfNvhAxgryii'
 	fumar_mata = 'https://www.youtube.com/playlist?list=PLks6UYnFddFlchoJnLIOB-gcegojnpAD7'
-	klubowe = 'https://www.youtube.com/watch?v=xwCk8H7-DdI'
-	# download_song(klubowe, save_path='test', confirm_properties=True)
-	# download_playlist(dw)
-	# download_playlist(fumar_mata, 'test2')
-	alter_metadata('test2/Mata FUMAR MATA/metadata.txt')
+
+	if sys.argv[1] == 'song':
+		link = sys.argv[2] if len(sys.argv) >= 3 else None
+		if not link or link == '':
+			link = input('Link: ');
+		download_song(link, save_path='ytdwnld_singles', confirm_properties=True)
+	elif sys.argv[1] == 'playlist':
+		link = sys.argv[2] if len(sys.argv) >= 3 else None
+		if not link or link == '':
+			link = input('Link: ');
+		download_playlist(link)
+	else:
+		print('2nd argument: song / playlist')
+		print('3rd argument: link')
+
+	# alter_metadata('test2/Mata FUMAR MATA/metadata.txt')
 	
 	
