@@ -136,7 +136,7 @@ def download_song(yt_link, save_path='', confirm_properties=False):
 	else:
 		set_metadata(mp3_path, title, artists)
 	
-	return (yt_title, 'downloaded', title, artists, mp3_path)
+	return (yt_title, 'downloaded', title, artists, os.path.abspath(mp3_path))
 
 def download_playlist(yt_link, save_path=''):
 	playlist = Playlist(yt_link)
@@ -163,7 +163,7 @@ def download_playlist(yt_link, save_path=''):
 			
 	with open(subfolder + '/metadata.txt', 'w') as file:
 		def save(id, data):
-			file.write(f'{id:<3} {data[0]:<40} {data[1]:<20} {data[2]:<20} {data[3]}\n')
+			file.write(f'{id:<3} | {data[0]:<40} | {data[1]:<20} | {data[2]:<20} | {data[3]}\n')
 		
 		# big brain header writing
 		save('ID', ('Video_title', 'Assessed_artists', 'Assessed_title', 'Filename'))
@@ -197,6 +197,51 @@ def download_playlist(yt_link, save_path=''):
 	# 	tag.title = title
 	# 	tag.save()
 
+def alter_metadata(filename):
+	print('Type the ID of the entry in the generated file that needs editing')
+	print('Type "0" or "exit" to exit')
+	print('Type "list" to list entries')
+	
+	def assert_num(command):
+		try:
+			num = int(command)
+			if num >= len(lines) or num < 0:
+				return 0
+			return num
+		except:
+			print('Invalid ID')
+			return 0
+	
+	def extract_entry(num):
+		line = lines[num]
+		
+		data = re.split(r'\s+\|\s', line)
+		print(data)
+		
+		return line
+	
+	lines = []
+	with open(filename, 'r') as file:
+		lines = file.readlines()
+		lines = [line for line in lines if not line.startswith('#')]
+	
+	while True:
+		command = input(': ')	
+		if command == '0' or command == 'exit':
+			break
+		elif command == 'list':
+			for l in lines:
+				print(l, end='')
+		else:
+			num = assert_num(command)
+			data = extract_entry(num)
+			
+			
+			
+			
+	
+	
+
 if __name__ == '__main__':
 	print('YEEEEEEE')
 	# video_title, status, title, artists = download_song('https://www.youtube.com/watch?v=XykXStXeVO8', 'test2', confirm_properties=True)
@@ -206,6 +251,7 @@ if __name__ == '__main__':
 	klubowe = 'https://www.youtube.com/watch?v=xwCk8H7-DdI'
 	# download_song(klubowe, save_path='test', confirm_properties=True)
 	# download_playlist(dw)
-	download_playlist(fumar_mata, 'test2')
+	# download_playlist(fumar_mata, 'test2')
+	alter_metadata('test2/Mata FUMAR MATA/metadata.txt')
 	
 	
