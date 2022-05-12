@@ -1,5 +1,6 @@
 # playlist can't be set to private
 
+from quopri import decodestring
 from pytube import Playlist, YouTube
 from moviepy.editor import AudioFileClip
 import sys
@@ -218,17 +219,16 @@ def run(argv: list[str]):
 			link = input('Link: ')
 		return link
 
-	if argv[1] == 'song':
-		link = argv[2] if len(argv) >= 3 else None
-		link = validate_link(link)
-		download_song(link, save_path='ytdwnld_singles', confirm_properties=True)
-	elif argv[1] == 'playlist':
-		link = argv[2] if len(argv) >= 3 else None
-		link = validate_link(link)
-		download_playlist(link)
+	operation = argv[1]
+	link = validate_link(argv[2] if len(argv) >= 3 else None)
+	destination = argv[3] if len(argv) >= 4 else ''
+
+	if operation == 'song':
+		download_song(link, save_path=destination, confirm_properties=True)
+	elif operation == 'playlist':
+		download_playlist(link, save_path=destination)
 	else:
-		print('2nd argument: {song|playlist}')
-		print('3rd argument: <youtube link>')
+		print('USAGE: {song|playlist} <youtube_link> [destination_folder]')
 
 if __name__ == '__main__':
 	run(sys.argv)
