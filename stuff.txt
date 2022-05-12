@@ -1,3 +1,0 @@
-playlist api type: snippet
-gets links, title and others
-

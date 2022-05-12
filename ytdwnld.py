@@ -1,6 +1,4 @@
-# playlist can't be set to private,
-
-# pylint: disable=unused-variable
+# playlist can't be set to private
 
 from pytube import Playlist, YouTube
 from moviepy.editor import AudioFileClip
@@ -21,7 +19,6 @@ def clear_title(t: str):
 	
 	# remove characters disliked by windows
 	t = re.sub(r'[\\/:*?"<>|]+', ' ', t).strip()
-	# t = re.sub(r'[^\w\s\-&.()]+', '', t)
 	
 	return t
 
@@ -151,6 +148,7 @@ def download_playlist(yt_link, save_path=''):
 	downloaded = []
 	
 	i = 0
+	#TODO refactor with enumerate
 	for link in playlist:
 		i += 1
 		print(f'{i}/{size}: ', end='') # print progress
@@ -236,16 +234,7 @@ def alter_metadata(filename):
 			num = assert_num(command)
 			data = extract_entry(num)
 			
-			
-			
-			
-	
-	
-
 if __name__ == '__main__':
-	print('YEEEEEEE')
-	fumar_mata = 'https://www.youtube.com/playlist?list=PLks6UYnFddFlchoJnLIOB-gcegojnpAD7'
-
 	if sys.argv[1] == 'song':
 		link = sys.argv[2] if len(sys.argv) >= 3 else None
 		if not link or link == '':
