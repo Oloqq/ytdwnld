@@ -175,25 +175,6 @@ def download_playlist(yt_link, save_path=''):
 			for p in present:
 				i += 1
 				save(i, p)
-	
-			
-	# print()
-	# print('Check new files\' metadata')
-	# print('Enter correct values or press ENTER to use assessed ones. (Separate artists with ";")')
-	# for entry in new_files:
-	# 	tag = eyed3.load(entry[0]).tag
-	# 	title = entry[2]
-	# 	artists = entry[3]
-	# 	print('YT video title:', entry[1])
-	# 	inp = input('Assessed title: ' + title + ' ')
-	# 	if inp != '':
-	# 		title = inp
-	# 	inp = input('Assessed artists: ' + artists.strip(';') + ' ')
-	# 	if inp != '':
-	# 		artists = inp
-	# 	tag.artist = artists
-	# 	tag.title = title
-	# 	tag.save()
 
 def alter_metadata(filename):
 	print('Type the ID of the entry in the generated file that needs editing')
@@ -233,22 +214,26 @@ def alter_metadata(filename):
 		else:
 			num = assert_num(command)
 			data = extract_entry(num)
-			
-if __name__ == '__main__':
-	if sys.argv[1] == 'song':
-		link = sys.argv[2] if len(sys.argv) >= 3 else None
+
+def run(argv: list[str]):
+	def validate_link(link) -> str:
 		if not link or link == '':
-			link = input('Link: ');
+			link = input('Link: ')
+		return link
+
+	if argv[1] == 'song':
+		link = argv[2] if len(argv) >= 3 else None
+		link = validate_link(link)
 		download_song(link, save_path='ytdwnld_singles', confirm_properties=True)
-	elif sys.argv[1] == 'playlist':
-		link = sys.argv[2] if len(sys.argv) >= 3 else None
-		if not link or link == '':
-			link = input('Link: ');
+	elif argv[1] == 'playlist':
+		link = argv[2] if len(argv) >= 3 else None
+		link = validate_link(link)
 		download_playlist(link)
 	else:
-		print('2nd argument: song / playlist')
-		print('3rd argument: link')
+		print('2nd argument: {song|playlist}')
+		print('3rd argument: <youtube link>')
 
-	# alter_metadata('test2/Mata FUMAR MATA/metadata.txt')
+if __name__ == '__main__':
+	run(sys.argv)
 	
 	
