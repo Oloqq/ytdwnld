@@ -147,10 +147,7 @@ def download_playlist(yt_link, save_path=''):
 	present = []
 	downloaded = []
 	
-	i = 0
-	#TODO refactor with enumerate
-	for link in playlist:
-		i += 1
+	for i, link in enumerate(playlist):
 		print(f'{i}/{size}: ', end='') # print progress
 		
 		video_title, status, title, artists, path = download_song(link, subfolder)
